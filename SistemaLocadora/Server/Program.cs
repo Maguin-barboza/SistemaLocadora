@@ -65,13 +65,8 @@ void ConfigureServices(IServiceCollection services)
     services.AddTransient<IClienteServiceReport, ClienteServiceReport>();
     services.AddTransient<IFilmeReportService, FilmeReportService>();
 
-    //connectionString = "Server=localhost;Port=3306;Database=sistema_locadora;Uid=root;Pwd=admin;";
-    //connectionString = "User ID=Dev;Password=DevAdmin;Host=localhost;Port=5432;Database=SistemaLocacao;Pooling=true;Connection Lifetime=0;";
-    connectionString = "Data Source=MAGNO-PC\\MSSQLSRVMAGNO;Initial Catalog=SistemaLocacao;User ID=sistemasteste;Password=123456;Connect Timeout=0;Application Name=SistemaLocacao";
+    connectionString = "Server=localhost;Port=3306;Database=sistema_locadora;Uid=root;Pwd=admin;";
 
-    //services.AddDbContext<LocadoraContext>(context =>
-    //    context.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
-
-    builder.Services.AddDbContext<LocadoraContext>(context =>
-        context.UseSqlServer(connectionString));
+    services.AddDbContext<LocadoraContext>(context =>
+        context.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 }
