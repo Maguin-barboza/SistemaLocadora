@@ -1,0 +1,23 @@
+﻿@page "/EditarCliente"
+
+<div>
+    <MudTextField @bind-Value="cliente.Id" Label="Id" Disabled=true />
+    <MudTextField @bind-Value="cliente.Nome" Label="Nome" />
+    <MudTextField @bind-Value="cliente.CPF" Label="CPF" />
+    <MudTextField @bind-Value="cliente.DataNascimento" Label="Dt. Nascimento" />
+</div>
+
+
+<button @onclick="@(() => SalvarCliente.InvokeAsync(cliente))" class="btn btn-primary">Salvar</button>
+<button @onclick="@(() => SalvarCliente.InvokeAsync(cliente))" class="btn btn-danger">Cancelar</button>
+
+@code {
+    [Parameter]
+    public ClienteDTO cliente { get; set; } = new ClienteDTO();
+
+    [Parameter]
+    public EventCallback<ClienteDTO> SalvarCliente { get; set; }
+
+    [Parameter]
+    public EventCallback Cancelar { get; set; }
+}

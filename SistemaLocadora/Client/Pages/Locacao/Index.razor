@@ -1,0 +1,137 @@
+﻿@page "/CadastroLocacao"
+@inject HttpClient http
+@inject NavigationManager navigation
+@inject IDialogService Dialog
+
+<style>
+    .selected {
+        background-color: #E51E35 !important;
+    }
+
+        .selected > td {
+            color: aquamarine !important;
+        }
+
+            .selected > td .mud-input {
+                color: aquamarine !important;
+            }
+</style>
+
+@if (!incluir && !alterar)
+{
+
+    <button class="btn btn-primary" @onclick="IncluirLocacao">Incluir</button>
+    <button class="btn btn-primary" @onclick="AlterarLocacao" disabled=@(locacaoselected.Id == 0)>Alterar</button>
+    <button class="btn btn-danger" @onclick="Deletar" disabled=@(locacaoselected.Id == 0)>Deletar</button>
+    <br />
+    <br />
+    <MudTable Items="locacoes" Hover="true" T="LocacaoDTO" Breakpoint="Breakpoint.Sm" @bind-SelectedItem="locacaoselected">
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>Cliente</MudTh>
+            <MudTh>Filme</MudTh>
+            <MudTh>Dt. Locação</MudTh>
+            <MudTh>Dt. Devolução</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Cliente">@context.ClienteNome</MudTd>
+            <MudTd DataLabel="Filme">@context.FilmeTitulo</MudTd>
+            <MudTd DataLabel="Dt Locação">@context.DataLocacao</MudTd>
+            <MudTd DataLabel="Dt Devolução">@context.DataDevolucao</MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
+}
+
+@if (incluir)
+{
+   <EditarLocacao SalvarLocacao=SalvarLocacao Cancelar=Cancelar></EditarLocacao>
+}
+
+@if(alterar)
+{
+    <EditarLocacao locacao=@locacaoselected SalvarLocacao=SalvarLocacao Cancelar=Cancelar></EditarLocacao>
+}
+
+@code {
+    IEnumerable<LocacaoDTO> locacoes;
+    LocacaoDTO locacaoselected;
+    bool incluir = false;
+    bool alterar = false;
+    MudDialog ConfirmarExclusao;
+
+    protected override async Task OnInitializedAsync()
+    {
+        locacaoselected = new LocacaoDTO();
+        locacoes = await http.GetFromJsonAsync<IEnumerable<LocacaoDTO>>("api/Locacao");
+    }
+
+    void IncluirLocacao()
+    {
+        incluir = true;
+    }
+
+    void AlterarLocacao()
+    {
+        alterar = true;
+    }
+
+    async Task SalvarLocacao(LocacaoDTO locacaoAux)
+    {
+        if(incluir)
+        {
+            await http.PostAsJsonAsync<LocacaoDTO>("api/Locacao", locacaoAux);
+
+            incluir = false;
+        }
+
+        if(alterar)
+        {
+            http.PutAsJsonAsync<LocacaoDTO>($"api/Locacao/{locacaoselected.Id}", locacaoAux);
+            alterar = false;
+        }
+
+        locacoes = await http.GetFromJsonAsync<IEnumerable<LocacaoDTO>>("api/Locacao");
+        StateHasChanged();
+        navigation.NavigateTo(@"/CadastroLocacao");
+    }
+
+    void Cancelar()
+    {
+        incluir = false;
+        alterar = false;
+    }
+
+    async Task Deletar()
+    {
+        var dialog = Dialog.Show<ConfirmarExclusao>("Excluir Locacao", new DialogOptions() { DisableBackdropClick = true });
+        var result = await dialog.Result;
+
+        if(!result.Cancelled)
+        {
+            await DeletarRegistro();
+        }
+    }
+
+    async Task DeletarRegistro()
+    {
+        DialogParameters parameters = new DialogParameters();
+        try
+        {
+            await http.DeleteAsync($"api/Locacao/{locacaoselected.Id}");
+
+            await Dialog.ShowMessageBox("Exclusão", "Registro Excluído com sucesso.");
+            
+            locacoes = await http.GetFromJsonAsync<IEnumerable<LocacaoDTO>>("api/Locacao");
+            StateHasChanged();
+
+        }
+        catch(Exception ex)
+        {
+            await Dialog.ShowMessageBox("Erro ao excluir registro", ex.Message);
+        }
+    }
+}

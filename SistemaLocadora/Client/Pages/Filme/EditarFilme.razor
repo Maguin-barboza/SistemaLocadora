@@ -1,0 +1,23 @@
+﻿@page "/EditarFilme"
+
+<div>
+    <MudTextField @bind-Value="filme.Id" Label="Id" Disabled=true />
+    <MudTextField @bind-Value="filme.Titulo" Label="Titulo" />
+    <MudTextField @bind-Value="filme.ClassificacaoIndicativa" Label="Classificação Indicátiva" />
+    <MudCheckBox @bind-Checked="filme.Lancamento" Label="Lançamento"></MudCheckBox>
+</div>
+
+
+<button @onclick="@(() => SalvarFilme.InvokeAsync(filme))" class="btn btn-primary">Salvar</button>
+<button @onclick="@(() => SalvarFilme.InvokeAsync(filme))" class="btn btn-danger">Cancelar</button>
+
+@code {
+    [Parameter]
+    public FilmeDTO filme { get; set; } = new FilmeDTO();
+
+    [Parameter]
+    public EventCallback<FilmeDTO> SalvarFilme { get; set; }
+
+    [Parameter]
+    public EventCallback Cancelar { get; set; }
+}

@@ -1,0 +1,140 @@
+﻿@page "/CadastroFilme"
+@inject HttpClient http
+@inject NavigationManager navigation
+@inject IDialogService Dialog
+
+<style>
+    .selected {
+        background-color: #E51E35 !important;
+    }
+
+        .selected > td {
+            color: aquamarine !important;
+        }
+
+            .selected > td .mud-input {
+                color: aquamarine !important;
+            }
+</style>
+
+@if (!incluir && !alterar)
+{
+
+    <button class="btn btn-primary" @onclick="IncluirFilme">Incluir</button>
+    <button class="btn btn-primary" @onclick="AlterarFilme" disabled=@(filmeselected.Id == 0)>Alterar</button>
+    <button class="btn btn-danger" @onclick="Deletar" disabled=@(filmeselected.Id == 0)>Deletar</button>
+    <br />
+    <br />
+    <MudTable Items="filmes" Hover="true" T="FilmeDTO" Breakpoint="Breakpoint.Sm" @bind-SelectedItem="filmeselected">
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>Titulo</MudTh>
+            <MudTh>Classificacao Ind.</MudTh>
+            <MudTh>Lançamento</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Titulo">@context.Titulo</MudTd>
+            <MudTd DataLabel="ClassificacaoIndicativa">@context.ClassificacaoIndicativa</MudTd>
+            <MudTd DataLabel="Lancamento">@(context.Lancamento ? "SIM": "NÃO")</MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
+}
+
+@if (incluir)
+{
+   <EditarFilme SalvarFilme=SalvarFilme Cancelar=Cancelar></EditarFilme>
+}
+
+@if(alterar)
+{
+    <EditarFilme filme=@filmeselected SalvarFilme=SalvarFilme Cancelar=Cancelar></EditarFilme>
+}
+
+@code {
+    IEnumerable<FilmeDTO> filmes;
+    FilmeDTO filmeselected;
+    bool incluir = false;
+    bool alterar = false;
+    MudDialog ConfirmarExclusao;
+
+    protected override async Task OnInitializedAsync()
+    {
+        filmeselected = new FilmeDTO();
+        filmes = await http.GetFromJsonAsync<IEnumerable<FilmeDTO>>("api/Filme");
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+
+    }
+
+    void IncluirFilme()
+    {
+        incluir = true;
+    }
+
+    void AlterarFilme()
+    {
+        alterar = true;
+    }
+
+    async Task SalvarFilme(FilmeDTO filmeAux)
+    {
+        if(incluir)
+        {
+            http.PostAsJsonAsync<FilmeDTO>("api/Filme", filmeAux);
+            incluir = false;
+        }
+
+        if(alterar)
+        {
+            http.PutAsJsonAsync<FilmeDTO>($"api/Filme/{filmeselected.Id}", filmeAux);
+            alterar = false;
+        }
+
+        filmes = await http.GetFromJsonAsync<IEnumerable<FilmeDTO>>("api/Filme");
+        StateHasChanged();
+        navigation.NavigateTo(@"/CadastroFilme");
+    }
+
+    void Cancelar()
+    {
+        incluir = false;
+        alterar = false;
+    }
+
+    async Task Deletar()
+    {
+        var dialog = Dialog.Show<ConfirmarExclusao>("Excluir Filme", new DialogOptions() { DisableBackdropClick = true });
+        var result = await dialog.Result;
+
+        if(!result.Cancelled)
+        {
+            await DeletarRegistro();
+        }
+    }
+
+    async Task DeletarRegistro()
+    {
+        DialogParameters parameters = new DialogParameters();
+        try
+        {
+            await http.DeleteAsync($"api/Filme/{filmeselected.Id}");
+
+            await Dialog.ShowMessageBox("Exclusão", "Registro Excluído com sucesso.");
+
+            filmes = await http.GetFromJsonAsync<IEnumerable<FilmeDTO>>("api/Filme");
+            StateHasChanged();
+            filmeselected = new FilmeDTO();
+
+        }
+        catch(Exception ex)
+        {
+            await Dialog.ShowMessageBox("Erro ao excluir registro", ex.Message);
+        }
+    }
+}

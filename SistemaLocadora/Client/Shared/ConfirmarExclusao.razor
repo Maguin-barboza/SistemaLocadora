@@ -1,0 +1,21 @@
+﻿<MudDialog>
+    <DialogContent>
+        Confirma Exclusão?
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancelar">Cancel</MudButton>
+        <MudButton OnClick="Confirmar" Color="Color.Warning">Confirma</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+    
+    void Confirmar()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+    
+    void Cancelar() => MudDialog.Cancel();
+}

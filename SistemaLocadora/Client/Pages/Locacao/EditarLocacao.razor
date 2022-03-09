@@ -1,0 +1,48 @@
+﻿@page "/EditarLocacao"
+@inject HttpClient http
+
+<div>
+    <MudTextField @bind-Value="Locacao.Id" Label="Id" Disabled=true />
+    
+    <MudSelect T=int Label="Cliente" Placeholder="Selecionar Cliente" @bind-Value="Locacao.ClienteId">
+        @foreach(ClienteDTO cliente in clientes)
+        {
+            <MudSelectItem T=int Value="cliente.Id">@cliente.Nome</MudSelectItem>
+        }
+    </MudSelect>
+
+    <MudSelect T=int Label="Filme" Placeholder="Selecionar Filme" @bind-Value="Locacao.FilmeId">
+        @foreach(FilmeDTO filme in filmes)
+        {
+            <MudSelectItem T=int Value="filme.Id">@filme.Titulo</MudSelectItem>
+        }
+    </MudSelect>
+
+    <MudDatePicker Label="Dt. Locação" @bind-Date=@Locacao.DataLocacao ReadOnly=false Disabled="true"></MudDatePicker>
+</div>
+<br />
+<br />
+@*<button @onclick="@(() => SalvarLocacao.InvokeAsync(Locacao))" class="btn btn-primary">Salvar</button>*@
+<button @onclick="@(() => SalvarLocacao.InvokeAsync(Locacao))" class="btn btn-primary">Salvar</button>
+<button @onclick="@Cancelar" class="btn btn-danger">Cancelar</button>
+
+@code {
+    [Parameter]
+    public LocacaoDTO Locacao { get; set; } = new LocacaoDTO();
+
+    [Parameter]
+    public EventCallback<LocacaoDTO> SalvarLocacao { get; set; }
+
+    [Parameter]
+    public EventCallback Cancelar { get; set; }
+
+    IEnumerable<ClienteDTO> clientes = new List<ClienteDTO>();
+    IEnumerable<FilmeDTO> filmes = new List<FilmeDTO>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        clientes = await http.GetFromJsonAsync<IEnumerable<ClienteDTO>>("api/Cliente");
+        filmes = await http.GetFromJsonAsync<IEnumerable<FilmeDTO>>("api/Filme");
+        base.OnInitialized();
+    }
+}

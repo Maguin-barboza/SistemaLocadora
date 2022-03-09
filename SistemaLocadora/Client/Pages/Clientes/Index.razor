@@ -1,0 +1,142 @@
+﻿@page "/CadastroCliente"
+@inject HttpClient http
+@inject NavigationManager navigation
+@inject IDialogService Dialog
+
+<style>
+    .selected {
+        background-color: #1E88E5 !important;
+    }
+
+        .selected > td {
+            color: white !important;
+        }
+
+            .selected > td .mud-input {
+                color: white !important;
+            }
+</style>
+
+@if (!incluir && !alterar)
+{
+
+    <button class="btn btn-primary" @onclick="IncluirCliente">Incluir</button>
+    <button class="btn btn-primary" @onclick="AlterarCliente" disabled=@(clienteselected.Id == 0) >Alterar</button>
+    <button class="btn btn-danger" @onclick="Deletar" disabled=@(clienteselected.Id == 0)>Deletar</button>
+    <br />
+    <br />
+    <MudTable Items="clientes" Hover="true" T="ClienteDTO" Breakpoint="Breakpoint.Sm" @bind-SelectedItem="clienteselected">
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>Nome</MudTh>
+            <MudTh>CPF</MudTh>
+            <MudTh>DtNascimento</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Nome">@context.Nome</MudTd>
+            <MudTd DataLabel="Cpf">@context.CPF</MudTd>
+            <MudTd DataLabel="DataNascimento">@context.DataNascimento</MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
+}
+
+@if (incluir)
+{
+    <div>
+        <EditarCliente SalvarCliente=SalvarCliente Cancelar=Cancelar></EditarCliente>
+    </div>
+}
+
+@if(alterar)
+{
+    <EditarCliente cliente=clienteselected SalvarCliente=SalvarCliente Cancelar=Cancelar></EditarCliente>
+}
+
+@code {
+    IEnumerable<ClienteDTO> clientes;
+    ClienteDTO clienteselected;
+    bool incluir = false;
+    bool alterar = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        clienteselected = new ClienteDTO();
+        clientes = await http.GetFromJsonAsync<IEnumerable<ClienteDTO>>("api/Cliente");
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+
+    }
+
+    void IncluirCliente()
+    {
+        incluir = true;
+    }
+
+    void AlterarCliente()
+    {
+        alterar = true;
+    }
+
+    async Task SalvarCliente(ClienteDTO clienteAux)
+    {
+        if(incluir)
+        {
+            http.PostAsJsonAsync<ClienteDTO>("api/Cliente", clienteAux);
+            incluir = false;
+        }
+
+        if(alterar)
+        {
+            http.PutAsJsonAsync<ClienteDTO>($"api/Cliente/{clienteselected.Id}", clienteAux);
+            alterar = false;
+        }
+
+        clientes = await http.GetFromJsonAsync<IEnumerable<ClienteDTO>>("api/Cliente");
+        StateHasChanged();
+
+        navigation.NavigateTo(@"/CadastroCliente");
+    }
+
+    void Cancelar()
+    {
+        incluir = false;
+        alterar = false;
+    }
+
+    async Task Deletar()
+    {
+        var dialog = Dialog.Show<ConfirmarExclusao>("Excluir Cliente", new DialogOptions() { DisableBackdropClick = true });
+        var result = await dialog.Result;
+
+        if(!result.Cancelled)
+        {
+            await DeletarRegistro();
+        }
+    }
+
+    async Task DeletarRegistro()
+    {
+        DialogParameters parameters = new DialogParameters();
+        try
+        {
+            await http.DeleteAsync($"api/Cliente/{clienteselected.Id}");
+
+            await Dialog.ShowMessageBox("Exclusão", "Registro Excluído com sucesso.");
+
+            clientes = await http.GetFromJsonAsync<IEnumerable<ClienteDTO>>("api/Cliente");
+            StateHasChanged();
+            clienteselected = new ClienteDTO();
+
+        }
+        catch (Exception ex)
+        {
+            await Dialog.ShowMessageBox("Erro ao excluir registro", ex.Message);
+        }
+    }
+}
