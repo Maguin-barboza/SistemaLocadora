@@ -126,7 +126,6 @@
         try
         {
             await http.DeleteAsync($"api/Cliente/{clienteselected.Id}");
-
             await Dialog.ShowMessageBox("Exclusão", "Registro Excluído com sucesso.");
 
             clientes = await http.GetFromJsonAsync<IEnumerable<ClienteDTO>>("api/Cliente");

@@ -12,5 +12,7 @@ namespace SistemaLocadora.Shared.DTOs
         public string Titulo { get; set; }
         public int ClassificacaoIndicativa { get; set; }
         public bool Lancamento { get; set; }
+
+        public IEnumerable<LocacaoDTO> LocacaoesDTO { get; set; }
     }
 }

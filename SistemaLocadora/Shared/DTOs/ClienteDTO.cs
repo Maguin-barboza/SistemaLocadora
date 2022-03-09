@@ -12,5 +12,7 @@ namespace SistemaLocadora.Shared.DTOs
         public string Nome { get; set; }
         public string CPF { get; set; }
         public DateTime DataNascimento { get; set; }
+
+        public IEnumerable<LocacaoDTO> LocacaoesDTO { get; set; }
     }
 }

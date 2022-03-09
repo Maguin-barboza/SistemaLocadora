@@ -15,6 +15,7 @@ namespace SistemaLocadora.Server.Controllers
         {
             _clienteServiceReport = clienteServiceReport;
         }
+
         // GET: api/<ClienteReportController>
         [HttpGet("atrasados")]
         public async Task<IActionResult> GetClienteEmAtraso()
@@ -34,6 +35,5 @@ namespace SistemaLocadora.Server.Controllers
         {
             _clienteServiceReport.SegundoClienteQueMaisAlugou();
         }
-
     }
 }

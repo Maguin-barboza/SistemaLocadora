@@ -1,0 +1,22 @@
+﻿@page "/Clientes/Atrasados"
+@inject HttpClient http
+
+<MudTable Items="clientes" Hover="false" T="ClienteDTO" Breakpoint="Breakpoint.Sm">
+    <HeaderContent>
+        <MudTh>Id</MudTh>
+        <MudTh>Nome</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Id">@context.Id</MudTd>
+        <MudTd DataLabel="Nome">@context.Nome</MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    IEnumerable<ClienteDTO> clientes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        clientes = await http.GetFromJsonAsync<IEnumerable<ClienteDTO>>("api/ClienteReport/atrasados");
+    }
+}

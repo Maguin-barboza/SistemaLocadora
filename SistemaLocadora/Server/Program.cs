@@ -63,8 +63,7 @@ void ConfigureServices(IServiceCollection services)
     services.AddTransient<IFilmeService, FilmeService>();
     services.AddTransient<ILocacaoService, LocacaoService>();
     services.AddTransient<IClienteServiceReport, ClienteServiceReport>();
-
-
+    services.AddTransient<IFilmeReportService, FilmeReportService>();
 
     //connectionString = "Server=localhost;Port=3306;Database=sistema_locadora;Uid=root;Pwd=admin;";
     //connectionString = "User ID=Dev;Password=DevAdmin;Host=localhost;Port=5432;Database=SistemaLocacao;Pooling=true;Connection Lifetime=0;";

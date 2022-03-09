@@ -24,7 +24,9 @@ namespace SistemaLocadora.Service.Services.ReportServices
             try
             {
                 IQueryable<Locacao> query = _locacaoRepository.Select();
-                IEnumerable<Cliente> clientesAtrasados = await query.Where(locacao => locacao.DataDevolucao < DateTime.Now.Date).Select(locacao => locacao.Cliente).Distinct().ToListAsync();
+
+                IEnumerable<Cliente> clientesAtrasados = await query.Where(locacao => locacao.DataDevolucao < DateTime.Now.Date)
+                                                                    .Select(locacao => locacao.Cliente).Distinct().ToListAsync();
                 IEnumerable<ClienteDTO> clientesAtrasadosDTO = _mapper.Map<IEnumerable<ClienteDTO>>(clientesAtrasados);
 
                 return clientesAtrasadosDTO;
@@ -35,30 +37,9 @@ namespace SistemaLocadora.Service.Services.ReportServices
             }
         }
 
-        public Task<ClienteDTO> SegundoClienteQueMaisAlugou()
+        public  Task<ClienteDTO> SegundoClienteQueMaisAlugou()
         {
-            try
-            {
-                IQueryable<Locacao> query = _locacaoRepository.Select();
-                //var result = from locacao in _locacaoRepository.Select()
-                //             join cliente in _clienteRepository.Select()
-                //             on locacao.ClienteId equals cliente.Id
-                //             group locacao by locacao.ClienteId into grouping
-                //             select new { Id = cliente.Id, Nome = cliente.Nome };
-
-                var result = from locacao in _locacaoRepository.Select()
-                             group locacao by locacao.Cliente into grouping
-                             select new { Id = grouping.Key.Id, Nome = grouping.Key.Nome, Count = grouping.Key.Locacoes.Count() };
-
-                var clientes = result.ToListAsync();
-
-                throw new NotImplementedException();
-                        
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
+            throw new NotImplementedException();
         }
     }
 }
